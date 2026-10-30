@@ -1,0 +1,21 @@
+apiVersion: asset.sap/v1
+kind: Asset
+type: mcp-server
+
+metadata:
+  name: sap-s4-costcenter-srv-mcp-server
+  description: 封装 SAP S/4HANA 成本中心 API，提供只读 MCP 工具用于查询差旅预算余额
+  version: "1.0.0"
+  translation: mcp-translation/translation.json
+  apiSpec: mcp-translation/api-spec.edmx
+
+provides:
+  apis:
+    - name: sap-s4-costcenter-srv-mcp-server
+      kind: mcp-server
+      ordId: customer.build:apiResource:travel-approval-8536e.sap-s4-costcenter-srv-mcp-server:v1
+
+requires:
+  - name: API_COSTCENTER_SRV
+    kind: api
+    ordId: sap.s4:apiResource:API_COSTCENTER_SRV:v1

@@ -1,0 +1,13 @@
+apiVersion: solution.sap/v1
+kind: Solution
+
+metadata:
+  name: travel-approval-8536e
+  version: "1.0.0"
+  description: "差旅申请审批管理系统 — 基于 SAP BTP 的多级审批自动化工作流，含 S/4HANA 预算校验和 Teams 通知"
+
+assets:
+  - ref: ./assets/travel-request-cap-app/asset.yaml
+  - ref: ./assets/workflows/travel-request-approval-workflow/asset.yaml
+  - ref: ./assets/sap-s4-costcenter-srv-mcp-server/asset.yaml
+  - ref: ./assets/sap-s4-budgetaccountcore-mcp-server/asset.yaml

@@ -1,0 +1,13 @@
+{
+  "welcomeFile": "index.html",
+  "routes": [
+    {
+      "source": "^/api/(.*)",
+      "destination": "travel-api"
+    },
+    {
+      "source": "^/(.*)$",
+      "localDir": "."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+apiVersion: asset.sap/v1
+kind: Asset
+
+metadata:
+  name: travel-request-approval-workflow
+  description: 差旅申请审批自动化工作流，根据申请金额路由审批（自动/单级/三级），通过 Microsoft Teams 发送通知，集成 S/4HANA 预算查询
+  version: "1.0.0"
+  type: n8nworkflow
+
+projectVersion: "1"
+sourceRoot: "."
+
+workflow:
+  definitionFile: travel-request-approval-workflow.n8n.json
+  name: travel-request-approval-workflow
+  ordId: sap.btpn8n:apiResource:ManagedN8nMcpServer:v1
+
+provides:
+  apis:
+    - name: travel_request_submitted
+      path: /travel-approval-8536e/travel-request-approval-workflow/travel-request-submitted
+      kind: rest
+      description: 接收差旅申请提交，执行金额路由审批并发送 Teams 通知
+      ordId: "sap.n8nwfrt:apiResource:travel-approval-8536e_travel-request-approval-workflow.travelRequestSubmitted:v1"
+    - name: travel_request_submitted_mcp_server
+      kind: mcp-server
+      description: MCP server for travel request submitted operations
+      ordId: "sap.n8nwfrt:apiResource:travel-approval-8536e_travel-request-approval-workflow.travelRequestSubmittedMcpServer:v1"
+
+requires:
+  - name: sap-s4-costcenter-srv-mcp-server
+    kind: mcp-server
+    ordId: customer.build:apiResource:travel-approval-8536e.sap-s4-costcenter-srv-mcp-server:v1

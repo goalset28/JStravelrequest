@@ -1,0 +1,962 @@
+[
+  {
+    "name": "get_metadata_api_costcenter_srv",
+    "title": "get_metadata_api_costcenter_srv",
+    "description": "Get metadata of the OData service with optional filtering to reduce token consumption.\nReturns the metadata in XML format, which can be used to discover available entities and their properties.\nCall this endpoint every time before you call other tools to ensure understanding of the schema.\nBased on the metadata, you can dynamically create an OData request.\n\nUse filtering parameters to get specific metadata sections. Without parameters, this tool returns the complete XML metadata (which might be huge).\nOnly use the specified enum values for the filtering parameters.\n",
+    "odataType": {
+      "metadataRequest": {},
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "etag"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "batch_for_api_costcenter_srv",
+    "title": "batch_for_api_costcenter_srv",
+    "description": "Execute multiple OData operations in a single batch request using the $batch endpoint. This allows you to combine multiple tool calls into one HTTP request, improving efficiency when performing multiple operations.",
+    "odataType": {
+      "batchRequest": {},
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "list_a_costcenter_for_api_costcenter_srv",
+    "title": "list_A_CostCenter_for_api_costcenter_srv",
+    "description": "Retrieve a list of entities from the A_CostCenter collection in the api_costcenter_srv service. Supports OData query options for filtering, sorting, ranking ($top), skipping ($skip), expanding related entities, counting, selecting specific properties. Only use attributes in the query options that are specified in the metadata. If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenter",
+        "crudOperation": "read",
+        "parameters": [
+          {
+            "name": "filter"
+          },
+          {
+            "name": "select"
+          },
+          {
+            "name": "orderby"
+          },
+          {
+            "name": "top"
+          },
+          {
+            "name": "skip"
+          },
+          {
+            "name": "expand"
+          },
+          {
+            "name": "inlinecount"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "etag"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "get_a_costcenter_for_api_costcenter_srv",
+    "title": "get_A_CostCenter_for_api_costcenter_srv",
+    "description": "Retrieve a single entity by its key from the A_CostCenter collection in the api_costcenter_srv service. Provide the key property value(s) to identify the specific entity to retrieve. Supports OData query options for selecting specific properties ($select), expanding related entities ($expand). If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenter",
+        "crudOperation": "readByKey",
+        "parameters": [
+          {
+            "name": "ControllingArea",
+            "newParameterName": "controllingarea"
+          },
+          {
+            "name": "CostCenter",
+            "newParameterName": "costcenter"
+          },
+          {
+            "name": "ValidityEndDate",
+            "newParameterName": "validityenddate"
+          },
+          {
+            "name": "select"
+          },
+          {
+            "name": "expand"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "etag"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "count_a_costcenter_for_api_costcenter_srv",
+    "title": "count_A_CostCenter_for_api_costcenter_srv",
+    "description": "Get the total count of entities in the A_CostCenter collection in the api_costcenter_srv service. Supports OData $filter to count only entities matching specific criteria. Use this when you need to determine the total number of entities without retrieving the actual data. If you need to understand the available filter properties, call get_metadata_api_costcenter_srv tool first to get the metadata.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenter",
+        "crudOperation": "count",
+        "parameters": [
+          {
+            "name": "filter"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_a_costcentertext_for_api_costcenter_srv",
+    "title": "list_A_CostCenterText_for_api_costcenter_srv",
+    "description": "Retrieve a list of entities from the A_CostCenterText collection in the api_costcenter_srv service. Supports OData query options for filtering, sorting, ranking ($top), skipping ($skip), expanding related entities, counting, selecting specific properties. Only use attributes in the query options that are specified in the metadata. If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenterText",
+        "crudOperation": "read",
+        "parameters": [
+          {
+            "name": "filter"
+          },
+          {
+            "name": "select"
+          },
+          {
+            "name": "orderby"
+          },
+          {
+            "name": "top"
+          },
+          {
+            "name": "skip"
+          },
+          {
+            "name": "expand"
+          },
+          {
+            "name": "inlinecount"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "etag"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "get_a_costcentertext_for_api_costcenter_srv",
+    "title": "get_A_CostCenterText_for_api_costcenter_srv",
+    "description": "Retrieve a single entity by its key from the A_CostCenterText collection in the api_costcenter_srv service. Provide the key property value(s) to identify the specific entity to retrieve. Supports OData query options for selecting specific properties ($select), expanding related entities ($expand). If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenterText",
+        "crudOperation": "readByKey",
+        "parameters": [
+          {
+            "name": "CostCenter",
+            "newParameterName": "costcenter"
+          },
+          {
+            "name": "ControllingArea",
+            "newParameterName": "controllingarea"
+          },
+          {
+            "name": "Language",
+            "newParameterName": "language"
+          },
+          {
+            "name": "ValidityEndDate",
+            "newParameterName": "validityenddate"
+          },
+          {
+            "name": "select"
+          },
+          {
+            "name": "expand"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "etag"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "count_a_costcentertext_for_api_costcenter_srv",
+    "title": "count_A_CostCenterText_for_api_costcenter_srv",
+    "description": "Get the total count of entities in the A_CostCenterText collection in the api_costcenter_srv service. Supports OData $filter to count only entities matching specific criteria. Use this when you need to determine the total number of entities without retrieving the actual data. If you need to understand the available filter properties, call get_metadata_api_costcenter_srv tool first to get the metadata.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenterText",
+        "crudOperation": "count",
+        "parameters": [
+          {
+            "name": "filter"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "list_to_text_in_a_costcenter_for_api_costcenter_srv",
+    "title": "list_to_Text_in_A_CostCenter_for_api_costcenter_srv",
+    "description": "Navigate from A_CostCenter to related A_CostCenterTextType entities via the 'to_Text' navigation property. Supports OData query options for filtering, sorting, paging, expanding, counting, and selecting specific properties. If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenter",
+        "navigationProperty": {
+          "name": "to_Text",
+          "crudOperation": "read",
+          "parameters": [
+            {
+              "name": "filter"
+            },
+            {
+              "name": "select"
+            },
+            {
+              "name": "orderby"
+            },
+            {
+              "name": "top"
+            },
+            {
+              "name": "skip"
+            },
+            {
+              "name": "expand"
+            },
+            {
+              "name": "inlinecount"
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "ControllingArea",
+            "newParameterName": "controllingarea"
+          },
+          {
+            "name": "CostCenter",
+            "newParameterName": "costcenter"
+          },
+          {
+            "name": "ValidityEndDate",
+            "newParameterName": "validityenddate"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "etag"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "count_to_text_in_a_costcenter_for_api_costcenter_srv",
+    "title": "count_to_Text_in_A_CostCenter_for_api_costcenter_srv",
+    "description": "Count A_CostCenterTextType entities accessible via the 'to_Text' navigation property of A_CostCenter in the api_costcenter_srv service. Returns the total number of matching entities.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenter",
+        "navigationProperty": {
+          "name": "to_Text",
+          "crudOperation": "count",
+          "parameters": [
+            {
+              "name": "filter"
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "ControllingArea",
+            "newParameterName": "controllingarea"
+          },
+          {
+            "name": "CostCenter",
+            "newParameterName": "costcenter"
+          },
+          {
+            "name": "ValidityEndDate",
+            "newParameterName": "validityenddate"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "get_to_costcenter_in_a_costcentertext_for_api_costcenter_srv",
+    "title": "get_to_CostCenter_in_A_CostCenterText_for_api_costcenter_srv",
+    "description": "Navigate from A_CostCenterText to the related A_CostCenterType entity via the 'to_CostCenter' navigation property. Supports $select and $expand query options. If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenterText",
+        "navigationProperty": {
+          "name": "to_CostCenter",
+          "crudOperation": "readByKey",
+          "parameters": [
+            {
+              "name": "select"
+            },
+            {
+              "name": "expand"
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "CostCenter",
+            "newParameterName": "costcenter"
+          },
+          {
+            "name": "ControllingArea",
+            "newParameterName": "controllingarea"
+          },
+          {
+            "name": "Language",
+            "newParameterName": "language"
+          },
+          {
+            "name": "ValidityEndDate",
+            "newParameterName": "validityenddate"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "etag"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "update_to_costcenter_in_a_costcentertext_for_api_costcenter_srv",
+    "title": "update_to_CostCenter_in_A_CostCenterText_for_api_costcenter_srv",
+    "description": "Update the A_CostCenterType entity navigated from A_CostCenterText via the 'to_CostCenter' navigation property (HTTP PATCH). Provide the parent key and the properties to update. If the structure is unknown, call get_metadata_api_costcenter_srv tool first.",
+    "odataType": {
+      "entitySet": {
+        "name": "A_CostCenterText",
+        "navigationProperty": {
+          "name": "to_CostCenter",
+          "crudOperation": "update",
+          "parameters": [
+            {
+              "name": "ValidityStartDate",
+              "newParameterName": "validitystartdate"
+            },
+            {
+              "name": "CompanyCode",
+              "newParameterName": "companycode"
+            },
+            {
+              "name": "BusinessArea",
+              "newParameterName": "businessarea"
+            },
+            {
+              "name": "CostCtrResponsiblePersonName",
+              "newParameterName": "costctrresponsiblepersonname"
+            },
+            {
+              "name": "CostCtrResponsibleUser",
+              "newParameterName": "costctrresponsibleuser"
+            },
+            {
+              "name": "CostCenterCurrency",
+              "newParameterName": "costcentercurrency"
+            },
+            {
+              "name": "ProfitCenter",
+              "newParameterName": "profitcenter"
+            },
+            {
+              "name": "Department",
+              "newParameterName": "department"
+            },
+            {
+              "name": "CostingSheet",
+              "newParameterName": "costingsheet"
+            },
+            {
+              "name": "FunctionalArea",
+              "newParameterName": "functionalarea"
+            },
+            {
+              "name": "Country",
+              "newParameterName": "country"
+            },
+            {
+              "name": "Region",
+              "newParameterName": "region"
+            },
+            {
+              "name": "CityName",
+              "newParameterName": "cityname"
+            },
+            {
+              "name": "CostCenterStandardHierArea",
+              "newParameterName": "costcenterstandardhierarea"
+            },
+            {
+              "name": "CostCenterCategory",
+              "newParameterName": "costcentercategory"
+            },
+            {
+              "name": "IsBlkdForPrimaryCostsPosting",
+              "newParameterName": "isblkdforprimarycostsposting"
+            },
+            {
+              "name": "IsBlkdForSecondaryCostsPosting",
+              "newParameterName": "isblkdforsecondarycostsposting"
+            },
+            {
+              "name": "IsBlockedForRevenuePosting",
+              "newParameterName": "isblockedforrevenueposting"
+            },
+            {
+              "name": "IsBlockedForCommitmentPosting",
+              "newParameterName": "isblockedforcommitmentposting"
+            },
+            {
+              "name": "IsBlockedForPlanPrimaryCosts",
+              "newParameterName": "isblockedforplanprimarycosts"
+            },
+            {
+              "name": "IsBlockedForPlanSecondaryCosts",
+              "newParameterName": "isblockedforplansecondarycosts"
+            },
+            {
+              "name": "IsBlockedForPlanRevenues",
+              "newParameterName": "isblockedforplanrevenues"
+            },
+            {
+              "name": "ConsumptionQtyIsRecorded",
+              "newParameterName": "consumptionqtyisrecorded"
+            },
+            {
+              "name": "Language",
+              "newParameterName": "language_2"
+            },
+            {
+              "name": "CostCenterCreatedByUser",
+              "newParameterName": "costcentercreatedbyuser"
+            },
+            {
+              "name": "CostCenterCreationDate",
+              "newParameterName": "costcentercreationdate"
+            }
+          ]
+        },
+        "parameters": [
+          {
+            "name": "CostCenter",
+            "newParameterName": "costcenter"
+          },
+          {
+            "name": "ControllingArea",
+            "newParameterName": "controllingarea"
+          },
+          {
+            "name": "Language",
+            "newParameterName": "language"
+          },
+          {
+            "name": "ValidityEndDate",
+            "newParameterName": "validityenddate"
+          }
+        ]
+      },
+      "responseHeaders": [
+        {
+          "name": "age"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "last-modified"
+        },
+        {
+          "name": "x-request-id"
+        },
+        {
+          "name": "x-correlation-id"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "content-encoding"
+        },
+        {
+          "name": "content-language"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "dataserviceversion"
+        },
+        {
+          "name": "etag"
+        },
+        {
+          "name": "sap-message"
+        }
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false
+    }
+  }
+]

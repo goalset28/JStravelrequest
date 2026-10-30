@@ -1,0 +1,1038 @@
+{
+    "name": "travel-request-approval-workflow",
+    "description": "差旅申请审批工作流。接收Travel Request Submitted，查询 S/4HANA 成本中心预算余额，根据申请金额自动路由（≤1000元自动审批，1001-10000元单级，>10000元三级），通过 Microsoft Teams 发送通知，并将审批结果回调给 CAP 应用。测试模式：所有申请模拟审批通过。",
+    "nodes": [
+        {
+            "parameters": {
+                "content": "## ⚙️ 审批阈值与测试配置\n此节点包含审批规则配置。\n**请根据实际情况更新下方 Code 节点中的值**：\n- `AUTO_APPROVE_LIMIT`：小于等于此金额（元）自动审批\n- `SINGLE_APPROVER_LIMIT`：小于等于此金额走单级审批\n- `MOCK_APPROVERS`：测试占位符邮箱，生产环境请替换为真实邮箱\n\n⚠️ **测试模式**：当前所有人工审批步骤均为模拟通过，生产环境需替换为真实审批流程。",
+                "height": 200,
+                "width": 500
+            },
+            "id": "sticky-config",
+            "name": "配置说明",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                -900,
+                -320
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "travel-approval-8536e/travel-request-approval-workflow/travel-request-submitted",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Travel Request Submitted",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -640,
+                0
+            ],
+            "webhookId": "e8ff7ed0-8360-49a1-a62f-11ee818d675b"
+        },
+        {
+            "parameters": {
+                "jsCode": "// 校验必填字段\nconst REQUIRED_FIELDS = ['requestId', 'estimatedAmount', 'employeeEmail', 'employeeName', 'destination', 'costCenter', 'managerEmail'];\n\nconst body = $json.body || {};\nconst missingFields = REQUIRED_FIELDS.filter(f => !body[f]);\n\nif (missingFields.length > 0) {\n  throw new Error(`缺少必填字段: ${missingFields.join(', ')}`);\n}\n\nif (typeof body.estimatedAmount !== 'number' || body.estimatedAmount <= 0) {\n  throw new Error('estimatedAmount 必须是正数');\n}\n\nreturn [{ json: body }];"
+            },
+            "id": "validate-body",
+            "name": "校验请求字段",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -400,
+                0
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ error: true, message: $json.message || '请求字段验证失败，请检查必填字段后重新提交', requestId: $('Travel Request Submitted').item.json.body.requestId }) }}",
+                "options": {
+                    "responseCode": 400
+                }
+            },
+            "id": "respond-validation-error",
+            "name": "返回校验错误",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                -400,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "mcpServerName": "{\"ordId\":\"customer.build:apiResource:travel-approval-8536e.sap-s4-costcenter-srv-mcp-server:v1\",\"name\":\"sap-s4-costcenter-srv-mcp-server\"}",
+                "toolMode": "list",
+                "toolFromList": "{\"name\":\"get_a_costcenter_for_api_costcenter_srv\"}",
+                "inputMode": "json",
+                "toolArguments": "={{ JSON.stringify({ CostCenter: $json.costCenter, ControllingArea: '1000' }) }}",
+                "additionalOptions": {
+                    "includeMetadata": false,
+                    "timeout": 30000
+                },
+                "mcpServers": "[{\"ordId\":\"customer.build:apiResource:travel-approval-8536e.sap-s4-costcenter-srv-mcp-server:v1\",\"name\":\"api_costcenter_srv\",\"description\":\"MCP server for the api_costcenter_srv service.\",\"tools\":[{\"name\":\"get_metadata_api_costcenter_srv\",\"description\":\"Get metadata of the OData service with optional filtering to reduce token consumption.\\nReturns the metadata in XML format, which can be used to discover available entities and their properties.\\nCall this endpoint every time before you call other tools to ensure understanding of the schema.\\nBased on the metadata, you can dynamically create an OData request.\\n\\nUse filtering parameters to get specific metadata sections. Without parameters, this tool returns the complete XML metadata (which might be huge).\\nOnly use the specified enum values for the filtering parameters.\\n\",\"inputSchema\":{\"type\":\"object\",\"properties\":{}}},{\"name\":\"batch_for_api_costcenter_srv\",\"description\":\"Execute multiple OData operations in a single batch request using the $batch endpoint. This allows you to combine multiple tool calls into one HTTP request, improving efficiency when performing multiple operations.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{}}},{\"name\":\"list_a_costcenter_for_api_costcenter_srv\",\"description\":\"Retrieve a list of entities from the A_CostCenter collection in the api_costcenter_srv service. Supports OData query options for filtering, sorting, ranking ($top), skipping ($skip), expanding related entities, counting, selecting specific properties. Only use attributes in the query options that are specified in the metadata. If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"orderby\":{\"type\":\"string\"},\"top\":{\"type\":\"string\"},\"skip\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"},\"inlinecount\":{\"type\":\"string\"}}}},{\"name\":\"get_a_costcenter_for_api_costcenter_srv\",\"description\":\"Retrieve a single entity by its key from the A_CostCenter collection in the api_costcenter_srv service. Provide the key property value(s) to identify the specific entity to retrieve. Supports OData query options for selecting specific properties ($select), expanding related entities ($expand). If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"controllingarea\":{\"type\":\"string\"},\"costcenter\":{\"type\":\"string\"},\"validityenddate\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"}}}},{\"name\":\"count_a_costcenter_for_api_costcenter_srv\",\"description\":\"Get the total count of entities in the A_CostCenter collection in the api_costcenter_srv service. Supports OData $filter to count only entities matching specific criteria. Use this when you need to determine the total number of entities without retrieving the actual data. If you need to understand the available filter properties, call get_metadata_api_costcenter_srv tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"}}}},{\"name\":\"list_a_costcentertext_for_api_costcenter_srv\",\"description\":\"Retrieve a list of entities from the A_CostCenterText collection in the api_costcenter_srv service. Supports OData query options for filtering, sorting, ranking ($top), skipping ($skip), expanding related entities, counting, selecting specific properties. Only use attributes in the query options that are specified in the metadata. If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"orderby\":{\"type\":\"string\"},\"top\":{\"type\":\"string\"},\"skip\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"},\"inlinecount\":{\"type\":\"string\"}}}},{\"name\":\"get_a_costcentertext_for_api_costcenter_srv\",\"description\":\"Retrieve a single entity by its key from the A_CostCenterText collection in the api_costcenter_srv service. Provide the key property value(s) to identify the specific entity to retrieve. Supports OData query options for selecting specific properties ($select), expanding related entities ($expand). If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"costcenter\":{\"type\":\"string\"},\"controllingarea\":{\"type\":\"string\"},\"language\":{\"type\":\"string\"},\"validityenddate\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"}}}},{\"name\":\"count_a_costcentertext_for_api_costcenter_srv\",\"description\":\"Get the total count of entities in the A_CostCenterText collection in the api_costcenter_srv service. Supports OData $filter to count only entities matching specific criteria. Use this when you need to determine the total number of entities without retrieving the actual data. If you need to understand the available filter properties, call get_metadata_api_costcenter_srv tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"}}}},{\"name\":\"list_to_text_in_a_costcenter_for_api_costcenter_srv\",\"description\":\"Navigate from A_CostCenter to related A_CostCenterTextType entities via the 'to_Text' navigation property. Supports OData query options for filtering, sorting, paging, expanding, counting, and selecting specific properties. If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"orderby\":{\"type\":\"string\"},\"top\":{\"type\":\"string\"},\"skip\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"},\"inlinecount\":{\"type\":\"string\"}}}},{\"name\":\"count_to_text_in_a_costcenter_for_api_costcenter_srv\",\"description\":\"Count A_CostCenterTextType entities accessible via the 'to_Text' navigation property of A_CostCenter in the api_costcenter_srv service. Returns the total number of matching entities.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"}}}},{\"name\":\"get_to_costcenter_in_a_costcentertext_for_api_costcenter_srv\",\"description\":\"Navigate from A_CostCenterText to the related A_CostCenterType entity via the 'to_CostCenter' navigation property. Supports $select and $expand query options. If the structure of the entity is not known, call get_metadata_api_costcenter_srv tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"select\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"}}}}]},{\"ordId\":\"customer.build:apiResource:travel-approval-8536e.sap-s4-budgetaccountcore-mcp-server:v1\",\"name\":\"cds_api_budgetaccountcore\",\"description\":\"MCP server for the cds_api_budgetaccountcore service.\",\"tools\":[{\"name\":\"get_metadata_cds_api_budgetaccountcore\",\"description\":\"Get metadata of the OData service with optional filtering to reduce token consumption.\\nReturns the metadata in XML format, which can be used to discover available entities and their properties.\\nCall this endpoint every time before you call other tools to ensure understanding of the schema.\\nBased on the metadata, you can dynamically create an OData request.\\n\\nUse filtering parameters to get specific metadata sections. Without parameters, this tool returns the complete XML metadata (which might be huge).\\nOnly use the specified enum values for the filtering parameters.\\n\",\"inputSchema\":{\"type\":\"object\",\"properties\":{}}},{\"name\":\"batch_for_cds_api_budgetaccountcore\",\"description\":\"Execute multiple OData operations in a single batch request using the $batch endpoint. This allows you to combine multiple tool calls into one HTTP request, improving efficiency when performing multiple operations.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{}}},{\"name\":\"list_budgetaccount_for_cds_api_budgetaccountcore\",\"description\":\"Retrieve a list of entities from the BudgetAccount collection in the cds_api_budgetaccountcore service. Supports OData query options for filtering, sorting, ranking ($top), skipping ($skip), expanding related entities, counting, selecting specific properties. Only use attributes in the query options that are specified in the metadata. If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"orderby\":{\"type\":\"string\"},\"top\":{\"type\":\"string\"},\"skip\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"},\"inlinecount\":{\"type\":\"string\"}}}},{\"name\":\"get_budgetaccount_for_cds_api_budgetaccountcore\",\"description\":\"Retrieve a single entity by its key from the BudgetAccount collection in the cds_api_budgetaccountcore service. Provide the key property value(s) to identify the specific entity to retrieve. Supports OData query options for selecting specific properties ($select), expanding related entities ($expand). If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"pubsecbudgetaccount\":{\"type\":\"string\"},\"pubsecbudgetaccountcocode\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"}}}},{\"name\":\"count_budgetaccount_for_cds_api_budgetaccountcore\",\"description\":\"Get the total count of entities in the BudgetAccount collection in the cds_api_budgetaccountcore service. Supports OData $filter to count only entities matching specific criteria. Use this when you need to determine the total number of entities without retrieving the actual data. If you need to understand the available filter properties, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"}}}},{\"name\":\"list_budgetaccounttext_for_cds_api_budgetaccountcore\",\"description\":\"Retrieve a list of entities from the BudgetAccountText collection in the cds_api_budgetaccountcore service. Supports OData query options for filtering, sorting, ranking ($top), skipping ($skip), expanding related entities, counting, selecting specific properties. Only use attributes in the query options that are specified in the metadata. If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"orderby\":{\"type\":\"string\"},\"top\":{\"type\":\"string\"},\"skip\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"},\"inlinecount\":{\"type\":\"string\"}}}},{\"name\":\"get_budgetaccounttext_for_cds_api_budgetaccountcore\",\"description\":\"Retrieve a single entity by its key from the BudgetAccountText collection in the cds_api_budgetaccountcore service. Provide the key property value(s) to identify the specific entity to retrieve. Supports OData query options for selecting specific properties ($select), expanding related entities ($expand). If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"pubsecbudgetaccount\":{\"type\":\"string\"},\"pubsecbudgetaccountcocode\":{\"type\":\"string\"},\"language\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"}}}},{\"name\":\"count_budgetaccounttext_for_cds_api_budgetaccountcore\",\"description\":\"Get the total count of entities in the BudgetAccountText collection in the cds_api_budgetaccountcore service. Supports OData $filter to count only entities matching specific criteria. Use this when you need to determine the total number of entities without retrieving the actual data. If you need to understand the available filter properties, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"}}}},{\"name\":\"list_to_text_in_budgetaccount_for_cds_api_budgetaccountcore\",\"description\":\"Navigate from BudgetAccount to related BudgetAccountCoreText_Type entities via the 'to_Text' navigation property. Supports OData query options for filtering, sorting, paging, expanding, counting, and selecting specific properties. If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"},\"select\":{\"type\":\"string\"},\"orderby\":{\"type\":\"string\"},\"top\":{\"type\":\"string\"},\"skip\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"},\"inlinecount\":{\"type\":\"string\"}}}},{\"name\":\"count_to_text_in_budgetaccount_for_cds_api_budgetaccountcore\",\"description\":\"Count BudgetAccountCoreText_Type entities accessible via the 'to_Text' navigation property of BudgetAccount in the cds_api_budgetaccountcore service. Returns the total number of matching entities.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"filter\":{\"type\":\"string\"}}}},{\"name\":\"get\",\"description\":\"Navigate from BudgetAccountText to the related BudgetAccountCore_Type entity via the 'to_BudgetAccount' navigation property. Supports $select and $expand query options. If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"select\":{\"type\":\"string\"},\"expand\":{\"type\":\"string\"}}}}]}]"
+            },
+            "id": "query-budget",
+            "name": "查询差旅预算余额",
+            "type": "CUSTOM.sapMcpClient",
+            "typeVersion": 1,
+            "position": [
+                -160,
+                0
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "budget-fallback",
+                            "name": "budgetCheckPassed",
+                            "value": true,
+                            "type": "boolean"
+                        },
+                        {
+                            "id": "budget-warning",
+                            "name": "budgetWarning",
+                            "value": "预算余额查询失败，请手动确认预算是否充足",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "budget-fallback",
+            "name": "预算查询降级处理",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.5,
+            "position": [
+                -160,
+                240
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// 审批金额阈值配置（ALL_CAPS）\nconst APPROVAL_THRESHOLDS = {\n  AUTO_APPROVE_LIMIT: 1000,       // ≤ 此金额（元）自动审批\n  SINGLE_APPROVER_LIMIT: 10000    // ≤ 此金额单级审批，> 此金额三级审批\n};\n\n// 测试占位符审批人配置 — 生产环境请替换为真实邮箱\nconst MOCK_APPROVERS = {\n  LEVEL_1_MANAGER: 'manager@test.example.com',\n  LEVEL_2_DEPT_MANAGER: 'deptmgr@test.example.com',\n  LEVEL_3_FINANCE: 'finance@test.example.com'\n};\n\nconst requestData = $('Travel Request Submitted').item.json.body;\nconst amount = requestData.estimatedAmount;\n\nlet routeType;\nif (amount <= APPROVAL_THRESHOLDS.AUTO_APPROVE_LIMIT) {\n  routeType = 'auto_approve';\n} else if (amount <= APPROVAL_THRESHOLDS.SINGLE_APPROVER_LIMIT) {\n  routeType = 'single_approval';\n} else {\n  routeType = 'multi_approval';\n}\n\nreturn [{\n  json: {\n    ...requestData,\n    routeType,\n    approvers: MOCK_APPROVERS,\n    thresholds: APPROVAL_THRESHOLDS\n  }\n}];"
+            },
+            "id": "route-config",
+            "name": "审批路由配置",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                80,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 3
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "auto-approve-condition",
+                                        "leftValue": "={{ $json.routeType }}",
+                                        "rightValue": "auto_approve",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputKey": "auto_approve"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 3
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "single-approval-condition",
+                                        "leftValue": "={{ $json.routeType }}",
+                                        "rightValue": "single_approval",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputKey": "single_approval"
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": true,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 3
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "multi-approval-condition",
+                                        "leftValue": "={{ $json.routeType }}",
+                                        "rightValue": "multi_approval",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            },
+                            "renameOutput": true,
+                            "outputKey": "multi_approval"
+                        }
+                    ]
+                },
+                "options": {
+                    "fallbackOutput": "extra"
+                }
+            },
+            "id": "route-switch",
+            "name": "根据金额路由审批",
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3.4,
+            "position": [
+                320,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "auto-status",
+                            "name": "status",
+                            "value": "AUTO_APPROVED",
+                            "type": "string"
+                        },
+                        {
+                            "id": "auto-decision",
+                            "name": "decision",
+                            "value": "approved",
+                            "type": "string"
+                        },
+                        {
+                            "id": "auto-approver-level",
+                            "name": "approverLevel",
+                            "value": "AUTO",
+                            "type": "string"
+                        },
+                        {
+                            "id": "auto-message",
+                            "name": "message",
+                            "value": "=申请金额 {{ $('审批路由配置').item.json.estimatedAmount }} 元（≤1,000元），已自动审批通过",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-auto-approved",
+            "name": "设置自动审批状态",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.5,
+            "position": [
+                560,
+                -200
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "chatMessage",
+                "operation": "create",
+                "chatId": {
+                    "mode": "id",
+                    "value": "PLACEHOLDER_CHAT_ID"
+                },
+                "contentType": "text",
+                "message": "=✅ 差旅申请已自动审批通过\n\n申请人：{{ $('审批路由配置').item.json.employeeName }}\n目的地：{{ $('审批路由配置').item.json.destination }}\n申请金额：{{ $('审批路由配置').item.json.estimatedAmount }} 元\n出行事由：{{ $('审批路由配置').item.json.purpose }}\n申请编号：{{ $('审批路由配置').item.json.requestId }}\n\n金额 ≤ 1,000元，已自动审批通过，请准备报销凭证。",
+                "options": {}
+            },
+            "id": "teams-notify-applicant-auto",
+            "name": "通知申请人-自动审批",
+            "type": "n8n-nodes-base.microsoftTeams",
+            "typeVersion": 2,
+            "position": [
+                800,
+                -200
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ error: true, message: 'Teams 通知发送失败，请重新提交申请', requestId: $('审批路由配置').item.json.requestId }) }}",
+                "options": {
+                    "responseCode": 500
+                }
+            },
+            "id": "respond-teams-error-auto",
+            "name": "返回Teams通知错误-自动",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                800,
+                -60
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "single-status",
+                            "name": "status",
+                            "value": "L1_REVIEWING",
+                            "type": "string"
+                        },
+                        {
+                            "id": "single-route",
+                            "name": "approvalRoute",
+                            "value": "SINGLE_APPROVER",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-single-status",
+            "name": "设置一级审批状态",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.5,
+            "position": [
+                560,
+                80
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "chatMessage",
+                "operation": "create",
+                "chatId": {
+                    "mode": "id",
+                    "value": "PLACEHOLDER_CHAT_ID"
+                },
+                "contentType": "text",
+                "message": "=🔔 差旅申请待审批（1,001-10,000元）\n\n申请人：{{ $('审批路由配置').item.json.employeeName }}\n目的地：{{ $('审批路由配置').item.json.destination }}\n出发日期：{{ $('审批路由配置').item.json.departureDate }}\n返回日期：{{ $('审批路由配置').item.json.returnDate }}\n申请金额：{{ $('审批路由配置').item.json.estimatedAmount }} 元\n出行事由：{{ $('审批路由配置').item.json.purpose }}\n成本中心：{{ $('审批路由配置').item.json.costCenter }}\n申请编号：{{ $('审批路由配置').item.json.requestId }}\n\n请及时审批。",
+                "options": {}
+            },
+            "id": "teams-notify-manager",
+            "name": "通知直接上级-待审批",
+            "type": "n8n-nodes-base.microsoftTeams",
+            "typeVersion": 2,
+            "position": [
+                800,
+                80
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ error: true, message: 'Teams 通知发送失败，请重新提交申请', requestId: $('审批路由配置').item.json.requestId }) }}",
+                "options": {
+                    "responseCode": 500
+                }
+            },
+            "id": "respond-teams-error-single",
+            "name": "返回Teams通知错误-单级",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                800,
+                220
+            ]
+        },
+        {
+            "parameters": {
+                "content": "⚠️ 测试模式：此节点模拟审批人决策。\n生产环境应替换为 SAP Task Center 节点实现人工审批。\n审批人邮箱在上方 Code 节点 MOCK_APPROVERS 中配置。",
+                "height": 100,
+                "width": 350
+            },
+            "id": "sticky-mock-single",
+            "name": "测试说明-单级",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1040,
+                20
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "mock-single-status",
+                            "name": "status",
+                            "value": "APPROVED",
+                            "type": "string"
+                        },
+                        {
+                            "id": "mock-single-decision",
+                            "name": "decision",
+                            "value": "approved",
+                            "type": "string"
+                        },
+                        {
+                            "id": "mock-single-approver-level",
+                            "name": "approverLevel",
+                            "value": "L1_MANAGER",
+                            "type": "string"
+                        },
+                        {
+                            "id": "mock-single-message",
+                            "name": "message",
+                            "value": "=直接上级已审批通过（测试模式）。申请金额：{{ $('审批路由配置').item.json.estimatedAmount }} 元",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "mock-single-approved",
+            "name": "模拟一级审批通过",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.5,
+            "position": [
+                1040,
+                80
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "multi-status",
+                            "name": "status",
+                            "value": "MULTI_LEVEL_REVIEWING",
+                            "type": "string"
+                        },
+                        {
+                            "id": "multi-route",
+                            "name": "approvalRoute",
+                            "value": "THREE_LEVEL",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-multi-status",
+            "name": "设置多级审批状态",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.5,
+            "position": [
+                560,
+                360
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "chatMessage",
+                "operation": "create",
+                "chatId": {
+                    "mode": "id",
+                    "value": "PLACEHOLDER_CHAT_ID"
+                },
+                "contentType": "text",
+                "message": "=🔔 差旅申请待三级审批（>10,000元）\n\n申请人：{{ $('审批路由配置').item.json.employeeName }}\n目的地：{{ $('审批路由配置').item.json.destination }}\n申请金额：{{ $('审批路由配置').item.json.estimatedAmount }} 元\n出行事由：{{ $('审批路由配置').item.json.purpose }}\n申请编号：{{ $('审批路由配置').item.json.requestId }}\n\n【第一级审批】请您作为直接上级首先审批。",
+                "options": {}
+            },
+            "id": "teams-notify-manager-multi",
+            "name": "通知直接上级-多级待审",
+            "type": "n8n-nodes-base.microsoftTeams",
+            "typeVersion": 2,
+            "position": [
+                800,
+                360
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ error: true, message: 'Teams 通知发送失败，请重新提交申请', requestId: $('审批路由配置').item.json.requestId }) }}",
+                "options": {
+                    "responseCode": 500
+                }
+            },
+            "id": "respond-teams-error-multi-l1",
+            "name": "返回Teams错误-多级L1",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                800,
+                480
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "chatMessage",
+                "operation": "create",
+                "chatId": {
+                    "mode": "id",
+                    "value": "PLACEHOLDER_CHAT_ID"
+                },
+                "contentType": "text",
+                "message": "=🔔 差旅申请待三级审批（>10,000元）\n\n申请人：{{ $('审批路由配置').item.json.employeeName }}\n目的地：{{ $('审批路由配置').item.json.destination }}\n申请金额：{{ $('审批路由配置').item.json.estimatedAmount }} 元\n申请编号：{{ $('审批路由配置').item.json.requestId }}\n\n【第二级审批】请您作为部门经理进行审批。",
+                "options": {}
+            },
+            "id": "teams-notify-dept-mgr",
+            "name": "通知部门经理-多级待审",
+            "type": "n8n-nodes-base.microsoftTeams",
+            "typeVersion": 2,
+            "position": [
+                1040,
+                360
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ error: true, message: 'Teams 通知发送失败，请重新提交申请', requestId: $('审批路由配置').item.json.requestId }) }}",
+                "options": {
+                    "responseCode": 500
+                }
+            },
+            "id": "respond-teams-error-multi-l2",
+            "name": "返回Teams错误-多级L2",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1040,
+                480
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "chatMessage",
+                "operation": "create",
+                "chatId": {
+                    "mode": "id",
+                    "value": "PLACEHOLDER_CHAT_ID"
+                },
+                "contentType": "text",
+                "message": "=🔔 差旅申请待三级审批（>10,000元）\n\n申请人：{{ $('审批路由配置').item.json.employeeName }}\n目的地：{{ $('审批路由配置').item.json.destination }}\n申请金额：{{ $('审批路由配置').item.json.estimatedAmount }} 元\n申请编号：{{ $('审批路由配置').item.json.requestId }}\n\n【第三级审批】请财务部门进行最终审批。",
+                "options": {}
+            },
+            "id": "teams-notify-finance",
+            "name": "通知财务-多级待审",
+            "type": "n8n-nodes-base.microsoftTeams",
+            "typeVersion": 2,
+            "position": [
+                1280,
+                360
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ error: true, message: 'Teams 通知发送失败，请重新提交申请', requestId: $('审批路由配置').item.json.requestId }) }}",
+                "options": {
+                    "responseCode": 500
+                }
+            },
+            "id": "respond-teams-error-multi-l3",
+            "name": "返回Teams错误-多级L3",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1280,
+                480
+            ]
+        },
+        {
+            "parameters": {
+                "content": "⚠️ 测试模式：此节点模拟三级审批通过。\n生产环境需替换为分级 SAP Task Center 审批链。",
+                "height": 80,
+                "width": 300
+            },
+            "id": "sticky-mock-multi",
+            "name": "测试说明-多级",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                1520,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "mock-multi-status",
+                            "name": "status",
+                            "value": "APPROVED",
+                            "type": "string"
+                        },
+                        {
+                            "id": "mock-multi-decision",
+                            "name": "decision",
+                            "value": "approved",
+                            "type": "string"
+                        },
+                        {
+                            "id": "mock-multi-approver-level",
+                            "name": "approverLevel",
+                            "value": "L3_FINANCE",
+                            "type": "string"
+                        },
+                        {
+                            "id": "mock-multi-message",
+                            "name": "message",
+                            "value": "=三级审批均通过（测试模式）。申请金额：{{ $('审批路由配置').item.json.estimatedAmount }} 元",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "mock-multi-approved",
+            "name": "模拟多级审批通过",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.5,
+            "position": [
+                1520,
+                360
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "chatMessage",
+                "operation": "create",
+                "chatId": {
+                    "mode": "id",
+                    "value": "PLACEHOLDER_CHAT_ID"
+                },
+                "contentType": "text",
+                "message": "=💰 差旅申请已通过三级审批，请启动报销流程\n\n申请人：{{ $('审批路由配置').item.json.employeeName }}\n目的地：{{ $('审批路由配置').item.json.destination }}\n出发日期：{{ $('审批路由配置').item.json.departureDate }}\n申请金额：{{ $('审批路由配置').item.json.estimatedAmount }} 元\n申请编号：{{ $('审批路由配置').item.json.requestId }}\n\n请财务部门按流程启动报销处理。",
+                "options": {}
+            },
+            "id": "teams-notify-reimbursement",
+            "name": "通知财务-报销触发",
+            "type": "n8n-nodes-base.microsoftTeams",
+            "typeVersion": 2,
+            "position": [
+                1760,
+                360
+            ],
+            "onError": "continueErrorOutput"
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ error: true, message: '报销通知发送失败，请重新提交申请', requestId: $('审批路由配置').item.json.requestId }) }}",
+                "options": {
+                    "responseCode": 500
+                }
+            },
+            "id": "respond-reimbursement-error",
+            "name": "返回报销通知错误",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1760,
+                480
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "callback-request-id",
+                            "name": "requestId",
+                            "value": "={{ $('审批路由配置').item.json.requestId }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "callback-status",
+                            "name": "status",
+                            "value": "={{ $json.status }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "callback-decision",
+                            "name": "decision",
+                            "value": "={{ $json.decision }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "callback-approver-level",
+                            "name": "approverLevel",
+                            "value": "={{ $json.approverLevel }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "callback-message",
+                            "name": "message",
+                            "value": "={{ $json.message }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "build-response",
+            "name": "构造最终响应",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.5,
+            "position": [
+                1280,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ success: true, requestId: $json.requestId, status: $json.status, decision: $json.decision, approverLevel: $json.approverLevel, message: $json.message }) }}",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "id": "respond-success",
+            "name": "返回处理结果",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1520,
+                0
+            ]
+        }
+    ],
+    "connections": {
+        "校验请求字段": {
+            "main": [
+                [
+                    {
+                        "node": "查询差旅预算余额",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "返回校验错误",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "查询差旅预算余额": {
+            "main": [
+                [
+                    {
+                        "node": "审批路由配置",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "预算查询降级处理",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "预算查询降级处理": {
+            "main": [
+                [
+                    {
+                        "node": "审批路由配置",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "审批路由配置": {
+            "main": [
+                [
+                    {
+                        "node": "根据金额路由审批",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "根据金额路由审批": {
+            "main": [
+                [
+                    {
+                        "node": "设置自动审批状态",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "设置一级审批状态",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "设置多级审批状态",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "设置自动审批状态": {
+            "main": [
+                [
+                    {
+                        "node": "通知申请人-自动审批",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "通知申请人-自动审批": {
+            "main": [
+                [
+                    {
+                        "node": "构造最终响应",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "返回Teams通知错误-自动",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "设置一级审批状态": {
+            "main": [
+                [
+                    {
+                        "node": "通知直接上级-待审批",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "通知直接上级-待审批": {
+            "main": [
+                [
+                    {
+                        "node": "模拟一级审批通过",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "返回Teams通知错误-单级",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "模拟一级审批通过": {
+            "main": [
+                [
+                    {
+                        "node": "构造最终响应",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "设置多级审批状态": {
+            "main": [
+                [
+                    {
+                        "node": "通知直接上级-多级待审",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "通知直接上级-多级待审": {
+            "main": [
+                [
+                    {
+                        "node": "通知部门经理-多级待审",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "返回Teams错误-多级L1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "通知部门经理-多级待审": {
+            "main": [
+                [
+                    {
+                        "node": "通知财务-多级待审",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "返回Teams错误-多级L2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "通知财务-多级待审": {
+            "main": [
+                [
+                    {
+                        "node": "模拟多级审批通过",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "返回Teams错误-多级L3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "模拟多级审批通过": {
+            "main": [
+                [
+                    {
+                        "node": "通知财务-报销触发",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "通知财务-报销触发": {
+            "main": [
+                [
+                    {
+                        "node": "构造最终响应",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "返回报销通知错误",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "构造最终响应": {
+            "main": [
+                [
+                    {
+                        "node": "返回处理结果",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Travel Request Submitted": {
+            "main": [
+                [
+                    {
+                        "node": "校验请求字段",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {
+        "查询差旅预算余额": [
+            {
+                "success": true,
+                "requestId": "req-test-001",
+                "tool": "get_a_costcenter_for_api_costcenter_srv",
+                "mcpServer": {
+                    "name": "sap-s4-costcenter-srv-mcp-server",
+                    "ordId": "customer.build:apiResource:travel-approval-8536e.sap-s4-costcenter-srv-mcp-server:v1",
+                    "globalTenantId": null
+                },
+                "result": {
+                    "isError": false,
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "CostCenter: CC1000, ControllingArea: 1000, CostCenterCurrency: CNY"
+                        }
+                    ],
+                    "structuredContent": {
+                        "CostCenter": "CC1000",
+                        "ControllingArea": "1000",
+                        "CostCenterCurrency": "CNY"
+                    }
+                },
+                "timestamp": "2026-10-30T07:46:00.000Z"
+            }
+        ]
+    },
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "travel-approval-8536e-workflow-instance"
+    },
+    "id": "Drgw9Op5rwSFteUL"
+}

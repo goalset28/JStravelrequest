@@ -1,0 +1,21 @@
+apiVersion: asset.sap/v1
+kind: Asset
+type: mcp-server
+
+metadata:
+  name: sap-s4-budgetaccountcore-mcp-server
+  description: 封装 SAP S/4HANA 预算账户 API，提供只读 MCP 工具用于查询部门差旅预算数据
+  version: "1.0.0"
+  translation: mcp-translation/translation.json
+  apiSpec: mcp-translation/api-spec.edmx
+
+provides:
+  apis:
+    - name: sap-s4-budgetaccountcore-mcp-server
+      kind: mcp-server
+      ordId: customer.build:apiResource:travel-approval-8536e.sap-s4-budgetaccountcore-mcp-server:v1
+
+requires:
+  - name: API_BUDGETACCOUNTCORE
+    kind: api
+    ordId: sap.s4:apiResource:API_BUDGETACCOUNTCORE:v1

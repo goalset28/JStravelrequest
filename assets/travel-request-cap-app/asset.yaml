@@ -1,0 +1,18 @@
+apiVersion: asset.sap/v1
+kind: Asset
+
+metadata:
+  name: travel-request-cap-app
+  description: 差旅申请 CAP 应用，提供差旅申请的数据模型、OData API、前端界面及 S/4HANA 预算查询集成
+  version: "1.0.0"
+
+type: application
+
+sourceRoot: "."
+
+provides:
+  apis:
+    - name: travel-request-api
+      kind: odata
+      description: 差旅申请管理 OData API，支持申请提交、状态查询和审批记录追溯
+      ordId: customer.build:apiResource:travel-approval-8536e.travel-request-cap-app:v1

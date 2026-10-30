@@ -1,0 +1,173 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "差旅申请审批工作流 API",
+    "description": "接收差旅申请，执行预算校验和金额路由审批，通过 Microsoft Teams 发送通知",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/travel-approval-8536e/travel-request-approval-workflow/travel-request-submitted": {
+      "post": {
+        "summary": "提交差旅申请并触发审批工作流",
+        "description": "接收差旅申请数据，查询 S/4HANA 预算余额，根据申请金额路由至相应审批流程，并通过 Teams 发送通知",
+        "operationId": "submitTravelRequest",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["requestId", "estimatedAmount", "employeeEmail", "employeeName", "destination", "costCenter", "managerEmail"],
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "差旅申请的唯一标识符（UUID）"
+                  },
+                  "employeeEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "申请人邮箱地址"
+                  },
+                  "employeeName": {
+                    "type": "string",
+                    "description": "申请人姓名"
+                  },
+                  "destination": {
+                    "type": "string",
+                    "description": "差旅目的地"
+                  },
+                  "departureDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "出发日期（YYYY-MM-DD）"
+                  },
+                  "returnDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "返回日期（YYYY-MM-DD）"
+                  },
+                  "estimatedAmount": {
+                    "type": "number",
+                    "description": "申请金额（人民币元），用于确定审批路由：≤1000 自动审批，1001-10000 单级，>10000 三级"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "CNY",
+                    "description": "货币代码（默认 CNY）"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "description": "出行事由说明"
+                  },
+                  "costCenter": {
+                    "type": "string",
+                    "description": "成本中心编号（用于 S/4HANA 预算查询）"
+                  },
+                  "managerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "直接上级邮箱（一级审批人）"
+                  },
+                  "departmentManagerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "部门经理邮箱（二级审批人，>10000元时使用）"
+                  },
+                  "financeEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "财务负责人邮箱（三级审批人，>10000元时使用）"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "申请处理成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "处理是否成功"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "description": "申请编号"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["AUTO_APPROVED", "L1_REVIEWING", "MULTI_LEVEL_REVIEWING", "APPROVED"],
+                      "description": "申请当前状态"
+                    },
+                    "decision": {
+                      "type": "string",
+                      "enum": ["approved", "rejected"],
+                      "description": "审批决策"
+                    },
+                    "approverLevel": {
+                      "type": "string",
+                      "enum": ["AUTO", "L1_MANAGER", "L2_DEPT_MANAGER", "L3_FINANCE"],
+                      "description": "完成审批的层级"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "处理结果说明"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求字段验证失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "内部处理错误（Teams 通知失败等）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

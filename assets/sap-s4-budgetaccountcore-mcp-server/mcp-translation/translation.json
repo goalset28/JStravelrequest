@@ -1,0 +1,773 @@
+{
+  "mcpTranslationVersion": "0.8",
+  "target": {
+    "ordId": "sap.s4:apiResource:API_BUDGETACCOUNTCORE:v1",
+    "type": "edmx"
+  },
+  "serverInfo": {
+    "name": "sap.mcp/cds_api_budgetaccountcore",
+    "title": "cds_api_budgetaccountcore",
+    "version": "1.0.0",
+    "description": "MCP server for the cds_api_budgetaccountcore service."
+  },
+  "tools": [
+    {
+      "name": "get_metadata_cds_api_budgetaccountcore",
+      "title": "get_metadata_cds_api_budgetaccountcore",
+      "description": "Get metadata of the OData service with optional filtering to reduce token consumption.\nReturns the metadata in XML format, which can be used to discover available entities and their properties.\nCall this endpoint every time before you call other tools to ensure understanding of the schema.\nBased on the metadata, you can dynamically create an OData request.\n\nUse filtering parameters to get specific metadata sections. Without parameters, this tool returns the complete XML metadata (which might be huge).\nOnly use the specified enum values for the filtering parameters.\n",
+      "odataType": {
+        "metadataRequest": {},
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "etag"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "batch_for_cds_api_budgetaccountcore",
+      "title": "batch_for_cds_api_budgetaccountcore",
+      "description": "Execute multiple OData operations in a single batch request using the $batch endpoint. This allows you to combine multiple tool calls into one HTTP request, improving efficiency when performing multiple operations.",
+      "odataType": {
+        "batchRequest": {},
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "list_budgetaccount_for_cds_api_budgetaccountcore",
+      "title": "list_BudgetAccount_for_cds_api_budgetaccountcore",
+      "description": "Retrieve a list of entities from the BudgetAccount collection in the cds_api_budgetaccountcore service. Supports OData query options for filtering, sorting, ranking ($top), skipping ($skip), expanding related entities, counting, selecting specific properties. Only use attributes in the query options that are specified in the metadata. If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccount",
+          "crudOperation": "read",
+          "parameters": [
+            {
+              "name": "filter"
+            },
+            {
+              "name": "select"
+            },
+            {
+              "name": "orderby"
+            },
+            {
+              "name": "top"
+            },
+            {
+              "name": "skip"
+            },
+            {
+              "name": "expand"
+            },
+            {
+              "name": "inlinecount"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "etag"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "get_budgetaccount_for_cds_api_budgetaccountcore",
+      "title": "get_BudgetAccount_for_cds_api_budgetaccountcore",
+      "description": "Retrieve a single entity by its key from the BudgetAccount collection in the cds_api_budgetaccountcore service. Provide the key property value(s) to identify the specific entity to retrieve. Supports OData query options for selecting specific properties ($select), expanding related entities ($expand). If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccount",
+          "crudOperation": "readByKey",
+          "parameters": [
+            {
+              "name": "PubSecBudgetAccount",
+              "newParameterName": "pubsecbudgetaccount"
+            },
+            {
+              "name": "PubSecBudgetAccountCoCode",
+              "newParameterName": "pubsecbudgetaccountcocode"
+            },
+            {
+              "name": "select"
+            },
+            {
+              "name": "expand"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "etag"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "count_budgetaccount_for_cds_api_budgetaccountcore",
+      "title": "count_BudgetAccount_for_cds_api_budgetaccountcore",
+      "description": "Get the total count of entities in the BudgetAccount collection in the cds_api_budgetaccountcore service. Supports OData $filter to count only entities matching specific criteria. Use this when you need to determine the total number of entities without retrieving the actual data. If you need to understand the available filter properties, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccount",
+          "crudOperation": "count",
+          "parameters": [
+            {
+              "name": "filter"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "list_budgetaccounttext_for_cds_api_budgetaccountcore",
+      "title": "list_BudgetAccountText_for_cds_api_budgetaccountcore",
+      "description": "Retrieve a list of entities from the BudgetAccountText collection in the cds_api_budgetaccountcore service. Supports OData query options for filtering, sorting, ranking ($top), skipping ($skip), expanding related entities, counting, selecting specific properties. Only use attributes in the query options that are specified in the metadata. If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccountText",
+          "crudOperation": "read",
+          "parameters": [
+            {
+              "name": "filter"
+            },
+            {
+              "name": "select"
+            },
+            {
+              "name": "orderby"
+            },
+            {
+              "name": "top"
+            },
+            {
+              "name": "skip"
+            },
+            {
+              "name": "expand"
+            },
+            {
+              "name": "inlinecount"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "etag"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "get_budgetaccounttext_for_cds_api_budgetaccountcore",
+      "title": "get_BudgetAccountText_for_cds_api_budgetaccountcore",
+      "description": "Retrieve a single entity by its key from the BudgetAccountText collection in the cds_api_budgetaccountcore service. Provide the key property value(s) to identify the specific entity to retrieve. Supports OData query options for selecting specific properties ($select), expanding related entities ($expand). If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccountText",
+          "crudOperation": "readByKey",
+          "parameters": [
+            {
+              "name": "PubSecBudgetAccount",
+              "newParameterName": "pubsecbudgetaccount"
+            },
+            {
+              "name": "PubSecBudgetAccountCoCode",
+              "newParameterName": "pubsecbudgetaccountcocode"
+            },
+            {
+              "name": "Language",
+              "newParameterName": "language"
+            },
+            {
+              "name": "select"
+            },
+            {
+              "name": "expand"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "etag"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "count_budgetaccounttext_for_cds_api_budgetaccountcore",
+      "title": "count_BudgetAccountText_for_cds_api_budgetaccountcore",
+      "description": "Get the total count of entities in the BudgetAccountText collection in the cds_api_budgetaccountcore service. Supports OData $filter to count only entities matching specific criteria. Use this when you need to determine the total number of entities without retrieving the actual data. If you need to understand the available filter properties, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccountText",
+          "crudOperation": "count",
+          "parameters": [
+            {
+              "name": "filter"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "list_to_text_in_budgetaccount_for_cds_api_budgetaccountcore",
+      "title": "list_to_Text_in_BudgetAccount_for_cds_api_budgetaccountcore",
+      "description": "Navigate from BudgetAccount to related BudgetAccountCoreText_Type entities via the 'to_Text' navigation property. Supports OData query options for filtering, sorting, paging, expanding, counting, and selecting specific properties. If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccount",
+          "navigationProperty": {
+            "name": "to_Text",
+            "crudOperation": "read",
+            "parameters": [
+              {
+                "name": "filter"
+              },
+              {
+                "name": "select"
+              },
+              {
+                "name": "orderby"
+              },
+              {
+                "name": "top"
+              },
+              {
+                "name": "skip"
+              },
+              {
+                "name": "expand"
+              },
+              {
+                "name": "inlinecount"
+              }
+            ]
+          },
+          "parameters": [
+            {
+              "name": "PubSecBudgetAccount",
+              "newParameterName": "pubsecbudgetaccount"
+            },
+            {
+              "name": "PubSecBudgetAccountCoCode",
+              "newParameterName": "pubsecbudgetaccountcocode"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "etag"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "count_to_text_in_budgetaccount_for_cds_api_budgetaccountcore",
+      "title": "count_to_Text_in_BudgetAccount_for_cds_api_budgetaccountcore",
+      "description": "Count BudgetAccountCoreText_Type entities accessible via the 'to_Text' navigation property of BudgetAccount in the cds_api_budgetaccountcore service. Returns the total number of matching entities.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccount",
+          "navigationProperty": {
+            "name": "to_Text",
+            "crudOperation": "count",
+            "parameters": [
+              {
+                "name": "filter"
+              }
+            ]
+          },
+          "parameters": [
+            {
+              "name": "PubSecBudgetAccount",
+              "newParameterName": "pubsecbudgetaccount"
+            },
+            {
+              "name": "PubSecBudgetAccountCoCode",
+              "newParameterName": "pubsecbudgetaccountcocode"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "get",
+      "title": "get_to_BudgetAccount_in_BudgetAccountText_for_cds_api_budgetaccountcore",
+      "description": "Navigate from BudgetAccountText to the related BudgetAccountCore_Type entity via the 'to_BudgetAccount' navigation property. Supports $select and $expand query options. If the structure of the entity is not known, call get_metadata_cds_api_budgetaccountcore tool first to get the metadata.",
+      "odataType": {
+        "entitySet": {
+          "name": "BudgetAccountText",
+          "navigationProperty": {
+            "name": "to_BudgetAccount",
+            "crudOperation": "readByKey",
+            "parameters": [
+              {
+                "name": "select"
+              },
+              {
+                "name": "expand"
+              }
+            ]
+          },
+          "parameters": [
+            {
+              "name": "PubSecBudgetAccount",
+              "newParameterName": "pubsecbudgetaccount"
+            },
+            {
+              "name": "PubSecBudgetAccountCoCode",
+              "newParameterName": "pubsecbudgetaccountcocode"
+            },
+            {
+              "name": "Language",
+              "newParameterName": "language"
+            }
+          ]
+        },
+        "responseHeaders": [
+          {
+            "name": "age"
+          },
+          {
+            "name": "cache-control"
+          },
+          {
+            "name": "expires"
+          },
+          {
+            "name": "last-modified"
+          },
+          {
+            "name": "x-request-id"
+          },
+          {
+            "name": "x-correlation-id"
+          },
+          {
+            "name": "content-type"
+          },
+          {
+            "name": "content-encoding"
+          },
+          {
+            "name": "content-language"
+          },
+          {
+            "name": "content-length"
+          },
+          {
+            "name": "dataserviceversion"
+          },
+          {
+            "name": "etag"
+          },
+          {
+            "name": "sap-message"
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    }
+  ]
+}
